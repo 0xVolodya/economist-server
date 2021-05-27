@@ -8,10 +8,6 @@ const {
   jwtSecret,
 } = require('../../config/vars');
 
-/**
- * User Schema
- * @private
- */
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -37,12 +33,6 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-/**
- * Add your
- * - pre-save hooks
- * - validations
- * - virtuals
- */
 userSchema.pre('save', async function save(next) {
   try {
     const rounds = env === 'test' ? 1 : 10;
@@ -56,9 +46,6 @@ userSchema.pre('save', async function save(next) {
   }
 });
 
-/**
- * Methods
- */
 userSchema.method({
   transform() {
     const transformed = {};
@@ -83,36 +70,7 @@ userSchema.method({
   },
 });
 
-/**
- * Statics
- */
 userSchema.statics = {
-  /**
-   * Get user
-   *
-   * @param {ObjectId} id - The objectId of user.
-   * @returns {Promise<User, APIError>}
-   */
-  async get(id) {
-    try {
-      let user;
-
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        user = await this.findById(id)
-          .exec();
-      }
-      if (user) {
-        return user;
-      }
-
-      throw new APIError({
-        message: 'User does not exist',
-        status: httpStatus.NOT_FOUND,
-      });
-    } catch (error) {
-      throw error;
-    }
-  },
 
   list() {
     return this.find()
@@ -120,12 +78,6 @@ userSchema.statics = {
       .exec();
   },
 
-  /**
-   * Find user by email and tries to generate a JWT token
-   *
-   * @param {ObjectId} id - The objectId of user.
-   * @returns {Promise<User, APIError>}
-   */
   async findAndGenerateToken(options) {
     const {
       email,
@@ -153,13 +105,6 @@ userSchema.statics = {
     throw new APIError(err);
   },
 
-  /**
-   * Return new validation error
-   * if error is a mongoose duplicate key error
-   *
-   * @param {Error} error
-   * @returns {Error|APIError}
-   */
   checkDuplicateEmail(error) {
     if (error.name === 'MongoError' && error.code === 11000) {
       return new APIError({
@@ -178,7 +123,4 @@ userSchema.statics = {
   },
 };
 
-/**
- * @typedef User
- */
 module.exports = mongoose.model('User', userSchema);

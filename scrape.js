@@ -4,7 +4,7 @@ const mongoose = require('./config/mongoose');
 
 mongoose.connect();
 
-const Articles = require('./api/models/article.model');
+const Articles = require('./api/models/article');
 
 // add stealth plugin and use defaults (all evasion techniques)
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');

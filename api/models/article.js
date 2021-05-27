@@ -1,4 +1,9 @@
 const mongoose = require('mongoose');
+const {
+  omitBy,
+  isNil,
+} = require('lodash');
+
 
 const articleSchema = new mongoose.Schema({
   date: {
@@ -30,6 +35,25 @@ const articleSchema = new mongoose.Schema({
 articleSchema.statics = {
   list() {
     return this.find()
+      .exec();
+  },
+};
+articleSchema.statics = {
+
+  list({
+    page = 1,
+    perPage = 12,
+    section,
+  }) {
+    const options = omitBy({
+      section,
+    }, isNil);
+    options.perPage = Number(perPage);
+
+    return this.find(options)
+      .sort({ createdAt: -1 })
+      .skip(perPage * (page - 1))
+      .limit(perPage)
       .exec();
   },
 };

@@ -10,6 +10,7 @@ module.exports = {
   jwtSecret: process.env.JWT_SECRET,
   mongo: {
     uri: process.env.NODE_ENV === 'production' ? process.env.MONGO_URI_PROD : localMongo,
+    prod: process.env.MONGO_URI_PROD,
   },
   logs: process.env.NODE_ENV === 'production' ? 'combined' : 'dev',
 };

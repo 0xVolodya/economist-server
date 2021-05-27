@@ -1,10 +1,6 @@
 const httpStatus = require('http-status');
-const User = require('../models/user.model');
+const User = require('../models/user');
 
-/**
- * Returns a formated object with tokens
- * @private
- */
 function generateTokenResponse(user, access_token) {
   return {
     access_token,

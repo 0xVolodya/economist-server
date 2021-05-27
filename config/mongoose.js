@@ -34,3 +34,16 @@ exports.connect = () => {
     .then(() => console.log('mongoDB connected...'));
   return mongoose.connection;
 };
+
+exports.connectProd = () => {
+  mongoose
+    .connect(mongo.prod, {
+      useCreateIndex: true,
+      keepAlive: 1,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    })
+    .then(() => console.log('mongoDB connected...'));
+  return mongoose.connection;
+};

@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 module.exports = {
-  // POST /v1/auth/register
+  // POST /auth/register
   register: {
     body: {
       email: Joi.string()
@@ -14,7 +14,7 @@ module.exports = {
     },
   },
 
-  // POST /v1/auth/login
+  // POST /auth/login
   login: {
     body: {
       email: Joi.string()

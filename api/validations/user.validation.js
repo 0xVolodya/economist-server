@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 module.exports = {
 
-  // POST /v1/users
+  // POST /users
   createUser: {
     body: {
       email: Joi.string().email().required(),
