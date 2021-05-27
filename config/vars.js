@@ -9,7 +9,7 @@ module.exports = {
   port: process.env.NODE_ENV === 'test' ? '3001' : process.env.PORT,
   jwtSecret: process.env.JWT_SECRET,
   mongo: {
-    uri: process.env.NODE_ENV === 'production' ? process.env.MONGO_URI_PROD : localMongo
+    uri: process.env.NODE_ENV === 'production' ? process.env.MONGO_URI_PROD : localMongo,
   },
   logs: process.env.NODE_ENV === 'production' ? 'combined' : 'dev',
 };

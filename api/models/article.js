@@ -48,12 +48,13 @@ articleSchema.statics = {
     const options = omitBy({
       section,
     }, isNil);
-    options.perPage = Number(perPage);
+    const perPageNumber = Number(perPage);
+    const pageNumber = Number(page);
 
     return this.find(options)
       .sort({ createdAt: -1 })
-      .skip(perPage * (page - 1))
-      .limit(perPage)
+      .skip(perPageNumber * (pageNumber - 1))
+      .limit(perPageNumber)
       .exec();
   },
 };
