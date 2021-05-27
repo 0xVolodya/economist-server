@@ -13,7 +13,7 @@ mongoose.connection.on('error', (err) => {
 
 // print mongoose logs in dev env
 if (env === 'development') {
-  mongoose.set('debug', true);
+  // mongoose.set('debug', true);
 }
 
 /**
