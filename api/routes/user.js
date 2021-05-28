@@ -8,4 +8,8 @@ router
   .route('/')
   .get(authorize(), controller.list);
 
+router
+  .route('/profile')
+  .get(authorize(), controller.loggedIn);
+
 module.exports = router;

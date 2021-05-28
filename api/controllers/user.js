@@ -13,3 +13,5 @@ exports.list = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.loggedIn = (req, res) => res.json(req.user.transform());

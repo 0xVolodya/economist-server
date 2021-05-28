@@ -52,7 +52,7 @@ articleSchema.statics = {
     const pageNumber = Number(page);
 
     return this.find(options)
-      .sort({ createdAt: -1 })
+      .sort({ date: -1 })
       .skip(perPageNumber * (pageNumber - 1))
       .limit(perPageNumber)
       .exec();
