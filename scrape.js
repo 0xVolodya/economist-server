@@ -33,6 +33,7 @@ module.exports = () => {
     // await page.screenshot({ path: 'testresult.png', fullPage: true })
     // await browser.close()
     console.log('Scraping done ✨');
+    page.close();
     browser.close();
   });
 };
