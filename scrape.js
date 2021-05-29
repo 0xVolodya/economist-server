@@ -55,7 +55,7 @@ async function goToArticles(page) {
 
   const sectionNames = await getSectionsNames(page);
 
-  for (let k = 1; k < lengthSectopm; k += 1) {
+  for (let k = 1; k < 5; k += 1) {
     if (excludeSections.includes(sectionNames[k])) continue;
     await page.waitForSelector('.ds-navigation-list--section .ds-navigation-link');
     world = await page.$$('.ds-navigation-list--section .ds-navigation-link');
