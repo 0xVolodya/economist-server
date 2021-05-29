@@ -1,8 +1,8 @@
 /* eslint-disable */
 const puppeteer = require('puppeteer-extra');
-const mongoose = require('./config/mongoose');
+// const mongoose = require('./config/mongoose');
 
-mongoose.connect();
+// mongoose.connect();
 
 const Articles = require('./api/models/article');
 
@@ -16,24 +16,27 @@ puppeteer.use(StealthPlugin());
 
 const excludeSections = ['Technology Quarterly', 'Special reports'];
 // puppeteer usage as normal
+module.exports = ()=>{
+  puppeteer.launch({ headless: true }).then(async (browser) => {
 
-puppeteer.launch({ headless: false }).then(async (browser) => {
-  console.log('Running tests..');
-  const page = await browser.newPage();
-  page.on('console', consoleObj => console.log(consoleObj.text()));
+    console.log('Running scraping..');
+    const page = await browser.newPage();
+    // page.on('console', consoleObj => console.log(consoleObj.text()));
 
-  await page.goto('https://www.economist.com/', {
-    waitUntil: 'networkidle0',
+    await page.goto('https://www.economist.com/', {
+      waitUntil: 'networkidle0',
+    });
+    // await login(page)
+    await goToArticles(page);
+
+    await page.waitForTimeout(1000);
+    // await page.screenshot({ path: 'testresult.png', fullPage: true })
+    // await browser.close()
+    console.log('Scraping done ✨');
+    browser.close();
   });
-  // await login(page)
-  await goToArticles(page);
+};
 
-
-  await page.waitForTimeout(1000);
-  // await page.screenshot({ path: 'testresult.png', fullPage: true })
-  // await browser.close()
-  console.log('All done, check the screenshot. ✨');
-});
 
 async function goToArticles(page) {
   // initial page
@@ -57,11 +60,13 @@ async function goToArticles(page) {
     world = await page.$$('.ds-navigation-list--section .ds-navigation-link');
 
     await world[k].click();
-    await page.waitForNavigation({
-      waitUntil: 'networkidle0',
-    });
+    await page.waitForSelector('.teaser--section-collection');
 
-    for (let j = 0; j < 5; j += 1) {
+    // await page.waitForNavigation({
+    //   waitUntil: 'networkidle0',
+    // });
+
+    for (let j = 0; j < 1; j += 1) {
       // articles
       let length = 0;
       try {
