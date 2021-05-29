@@ -16,8 +16,8 @@ puppeteer.use(StealthPlugin());
 
 const excludeSections = ['Technology Quarterly', 'Special reports'];
 // puppeteer usage as normal
-module.exports = ()=>{
-  puppeteer.launch({ headless: true }).then(async (browser) => {
+module.exports = () => {
+  puppeteer.launch({headless: true, args: ['--no-sandbox']}).then(async (browser) => {
 
     console.log('Running scraping..');
     const page = await browser.newPage();
@@ -154,7 +154,7 @@ async function login(page) {
   await page.waitForTimeout(500);
   const inputForm = await page.$('.ds-form-input');
   await inputForm.click();
-  await page.keyboard.type('lebedev.vladimir3@gmail.com', { delay: 100 });
+  await page.keyboard.type('lebedev.vladimir3@gmail.com', {delay: 100});
   await page.click('button[type="submit"]');
 
   // second login with password
@@ -184,7 +184,7 @@ async function login(page) {
 
 async function createArticleOrUpdate(data) {
   try {
-    let found = await Articles.findOne({ imageUrl: data.imageUrl }).exec();
+    let found = await Articles.findOne({imageUrl: data.imageUrl}).exec();
     if (found) {
       found = Object.assign(found, data);
 
