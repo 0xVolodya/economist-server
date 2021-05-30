@@ -43,8 +43,7 @@ async function goToArticles(page) {
   const sectionLength = await getSectionLength(page)
 
   const sectionNames = await getSectionsNames(page);
-  //only 5 section because heroku will crash
-  for (let sectionNumber = 1; sectionNumber < 5; sectionNumber += 1) {
+  for (let sectionNumber = 1; sectionNumber < sectionLength; sectionNumber += 1) {
     //exclude section which are different
     if (excludeSections.includes(sectionNames[sectionNumber])) continue;
 
