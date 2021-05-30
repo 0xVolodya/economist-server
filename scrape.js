@@ -6,7 +6,6 @@ const puppeteer = require('puppeteer-extra');
 
 const Articles = require('./api/models/article');
 
-// add stealth plugin and use defaults (all evasion techniques)
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
 
@@ -15,23 +14,20 @@ puppeteer.use(AdblockerPlugin());
 puppeteer.use(StealthPlugin());
 
 const excludeSections = ['Technology Quarterly', 'Special reports'];
-// puppeteer usage as normal
 module.exports = () => {
   puppeteer.launch({headless: true, args: ['--no-sandbox']}).then(async (browser) => {
 
     console.log('Running scraping..');
     const page = await browser.newPage();
     // page.on('console', consoleObj => console.log(consoleObj.text()));
-
-    await page.goto('https://www.economist.com/', {
-      waitUntil: 'networkidle0',
+    await page.setViewport({
+      width: 1100,
+      height: 1200,
     });
+    await page.goto('https://www.economist.com/');
     // await login(page)
     await goToArticles(page);
 
-    await page.waitForTimeout(1000);
-    // await page.screenshot({ path: 'testresult.png', fullPage: true })
-    // await browser.close()
     console.log('Scraping done ✨');
     page.close();
     browser.close();
@@ -40,63 +36,34 @@ module.exports = () => {
 
 
 async function goToArticles(page) {
-  // initial page
   let articleObject = {};
-  const cookoeAccept = await page.$('.evidon-barrier-acceptbutton');
-  if (cookoeAccept && cookoeAccept[0]) cookoeAccept[0].click();
-  const menuItem = await page.$('.ds-menu-disclosure');
-  await menuItem.click();
+  await acceptCookie(page)
+  await clickMenu(page)
 
-  const sections = await page.$('.ds-navigation-list--section');
-  await sections.click();
-  await page.waitForTimeout(100);
-  let world = await page.$$('.ds-navigation-list--section .ds-navigation-link');
-  const lengthSectopm = world.length;
+  const sectionLength = await getSectionLength(page)
 
   const sectionNames = await getSectionsNames(page);
+  for (let sectionNumber = 1; sectionNumber < sectionLength; sectionNumber += 1) {
+    //exclude section which are different
+    if (excludeSections.includes(sectionNames[sectionNumber])) continue;
 
-  for (let k = 1; k < 5; k += 1) {
-    if (excludeSections.includes(sectionNames[k])) continue;
-    await page.waitForSelector('.ds-navigation-list--section .ds-navigation-link');
-    world = await page.$$('.ds-navigation-list--section .ds-navigation-link');
-
-    await world[k].click();
-    await page.waitForSelector('.teaser--section-collection');
-
-    // await page.waitForNavigation({
-    //   waitUntil: 'networkidle0',
-    // });
-
+    await clickSection(page, sectionNumber)
+    //go through pages
     for (let j = 0; j < 1; j += 1) {
-      // articles
       let length = 0;
       try {
-        await page.waitForSelector('.teaser--section-collection');
-
-        const articlesLinks = await page.$$('.teaser--section-collection');
-        length = articlesLinks.length;
+        length = await getArticlesLength(page)
       } catch (e) {
         break;
         console.error(e);
       }
+
+      //go through articles
       for (let i = 0; i < length; i += 1) {
         try {
-          const articlesLinks = await page.$$('.teaser--section-collection');
-          articleObject = {};
-          const link = articlesLinks[i];
-          await link.click();
-          await page.waitForSelector('.article__subheadline');
 
-          // assign values
-
-          articleObject.date = getDate(await page.url());
-          articleObject.subheadline = await page.$eval('.article__subheadline', el => el.innerText);
-          articleObject.headline = await page.$eval('.article__headline', el => el.innerText);
-          articleObject.description = await page.$eval('.article__description', el => el.innerText);
-          articleObject.section = await page.$eval('.article__section-headline a', el => el.innerText);
-          articleObject.imageUrl = await page.evaluate('document.querySelector("img").getAttribute("src")');
-          articleObject.bodyText = await getBodyText(page);
-          // articles.push(articleObject)
+          await clickArticle(page, i)
+          articleObject = await getArticleData(page);
           await createArticleOrUpdate(articleObject);
           await page.goBack();
           await page.waitForSelector('.teaser--section-collection');
@@ -113,20 +80,33 @@ async function goToArticles(page) {
         });
       } catch (e) {
         break;
-        console.error(e);
+        console.log(e);
       }
     }
 
-    await page.waitForSelector('.ds-menu-disclosure');
+    await clickMenu(page)
 
-    await page.waitForSelector('.ds-menu-disclosure');
-    const menuItem = await page.$('.ds-menu-disclosure');
-    await menuItem.click();
-
-    await page.waitForSelector('.ds-navigation-list--section');
-    const sections = await page.$('.ds-navigation-list--section');
-    await sections.click();
+    // await openSectionMenu(page)
   }
+}
+
+async function acceptCookie(page) {
+  page.waitForTimeout(200)
+  const cookoeAccept = await page.$('.evidon-barrier-acceptbutton');
+  if (cookoeAccept && cookoeAccept[0]) cookoeAccept[0].click();
+}
+
+async function clickMenu(page) {
+  await page.waitForTimeout(200);
+  await page.waitForSelector('#menu-button');
+
+  await page.click('#menu-button');
+}
+
+async function getSectionLength(page) {
+  await page.waitForTimeout(100);
+  let world = await page.$$('.ds-navigation-list--section .ds-navigation-link');
+  return world.length;
 }
 
 function getDate(url) {
@@ -147,6 +127,57 @@ async function getSectionsNames(page) {
   );
 }
 
+async function clickSection(page, sectionNumber) {
+  await page.waitForSelector('.ds-navigation-list--section .ds-navigation-link');
+  await page.evaluate((number) => {
+    const world = document.querySelectorAll('.ds-navigation-list--section .ds-navigation-link');
+    world[number].click()
+  }, sectionNumber);
+}
+
+async function getArticlesLength(page) {
+  await page.waitForSelector('.teaser--section-collection');
+
+  const articlesLinks = await page.$$('.teaser--section-collection');
+  return articlesLinks.length;
+}
+
+async function clickArticle(page, i) {
+  const articlesLinks = await page.$$('.teaser--section-collection');
+  const link = articlesLinks[i];
+  await link.click();
+  await page.waitForSelector('.article__subheadline');
+
+}
+
+async function getArticleData(page) {
+  const articleObject ={}
+  articleObject.date = getDate(await page.url());
+  articleObject.subheadline = await page.$eval('.article__subheadline', el => el.innerText);
+  articleObject.headline = await page.$eval('.article__headline', el => el.innerText);
+  articleObject.description = await page.$eval('.article__description', el => el.innerText);
+  articleObject.section = await page.$eval('.article__section-headline a', el => el.innerText);
+  articleObject.imageUrl = await page.evaluate('document.querySelector("img").getAttribute("src")');
+  articleObject.bodyText = await getBodyText(page);
+
+  return articleObject
+}
+
+async function createArticleOrUpdate(data) {
+  try {
+    let found = await Articles.findOne({imageUrl: data.imageUrl}).exec();
+    if (found) {
+      found = Object.assign(found, data);
+
+      await found.save();
+      return;
+    }
+    const article = new Articles(data);
+    await article.save();
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 async function login(page) {
   const loginButton = await page.$('.ds-masthead-nav-beta__item--log-in');
@@ -183,21 +214,6 @@ async function login(page) {
   await page.keyboard.type(String.fromCharCode(13));
 }
 
-async function createArticleOrUpdate(data) {
-  try {
-    let found = await Articles.findOne({imageUrl: data.imageUrl}).exec();
-    if (found) {
-      found = Object.assign(found, data);
-
-      await found.save();
-      return;
-    }
-    const article = new Articles(data);
-    await article.save();
-  } catch (error) {
-    console.error(error);
-  }
-}
 
 /*
 await page.evaluate(async () => {

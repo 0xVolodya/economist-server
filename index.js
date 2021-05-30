@@ -13,9 +13,9 @@ mongoose.connect();
 
 app.listen(port, () => logger.info(`server started on port ${port} (${env})`));
 
-cron.schedule('*/30 * * * *', () => {
-  console.log('running a task every 30 min');
-  scrape()
+cron.schedule('* */2 * * *', () => {
+  console.log('running a task every 2 hour');
+  scrape();
 });
 
 module.exports = app;
