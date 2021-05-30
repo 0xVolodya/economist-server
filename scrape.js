@@ -25,7 +25,7 @@ module.exports = () => {
       height: 1200,
     });
     await page.goto('https://www.economist.com/');
-    // await login(page)
+    await login(page)
     await goToArticles(page);
 
     console.log('Scraping done ✨');
@@ -43,7 +43,8 @@ async function goToArticles(page) {
   const sectionLength = await getSectionLength(page)
 
   const sectionNames = await getSectionsNames(page);
-  for (let sectionNumber = 1; sectionNumber < sectionLength; sectionNumber += 1) {
+  //only 5 section because heroku will crash
+  for (let sectionNumber = 1; sectionNumber < 5; sectionNumber += 1) {
     //exclude section which are different
     if (excludeSections.includes(sectionNames[sectionNumber])) continue;
 
